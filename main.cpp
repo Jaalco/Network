@@ -5,12 +5,31 @@
 #include <iostream>
 #include <thread>
 
-void server(int port)
+void server()
 {
+    int ports[5] =
+    {
+        44300,
+        44301,
+        44302,
+        4303,
+        4304
+    };
+
+    std::cout << "gnugnjoifdgjdsigjhroigjergijgoigjoiewnfdoi\n";
     sf::TcpListener listener;
     sf::Socket::Status status;
-    status = listener.listen(port);
-    if (status != sf::Socket::Done)
+    int currentPort = 0;
+    for (int port : ports)
+    {
+        status = listener.listen(port);
+        if (status == sf::Socket::Done)
+        {
+            currentPort = port;
+            break;
+        }
+    }
+    if(currentPort == 0)
     {
         std::cout << "Error listening\n";
         return;
@@ -45,13 +64,31 @@ void server(int port)
     }
 }
 
-void client(int port)
+void client()
 {
+    int ports[5] =
+    {
+        44300,
+        44301,
+        44302,
+        4303,
+        4304
+    };
+
     sf::TcpSocket socket;
     sf::IpAddress address("localhost");
     sf::Socket::Status status;
-    status = socket.connect(address, port);
-    if (status != sf::Socket::Done)
+    int currentPort = 0;
+    for (int port : ports)
+    {
+        status = socket.connect(address, port);
+        if (status == sf::Socket::Done)
+        {
+            currentPort = port;
+            break;
+        }
+    }
+    if (currentPort == 0)
     {
         std::cout << "Error connecting\n";
         return;
@@ -80,37 +117,12 @@ void client(int port)
 
 }
 
-bool portOpen(const std::string& address, int port)
-{
-    return (sf::TcpSocket().connect(address, port) == sf::Socket::Done);
-}
 
 int main()
 {
-    int ports[5] =
-    {
-        4300,
-        4301,
-        4302,
-        4303,
-        4304
-    };
-
-    int currentPort = 0;
-    for (int port : ports)
-    {
-        if (portOpen("localhost", port))
-        {
-            currentPort = port;
-        }
-    }
-
-    if(currentPort != 0)
-    {
-        std::thread serverThread([currentPort] &server(currentPort));
-        std::this_thread::sleep_for(std::chrono::microseconds(10));
-        client(currentPort);
-        serverThread.join();
-    }
+    std::thread serverThread(&server);
+    std::this_thread::sleep_for(std::chrono::microseconds(10));
+    client();
+    serverThread.join();
     return 0;
 }
